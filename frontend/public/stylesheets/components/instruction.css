@@ -1,0 +1,218 @@
+.instruction-page {
+  background: rgb(115, 147, 168);
+  width: 100vw;
+  padding: 20px 130px 50px 130px;
+  font-family: Palatino, "Palatino LT STD", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  color:  rgb(57, 75, 129);
+  display: flex;
+  flex-direction: column;
+}
+.title-instruction {
+  text-align: center;
+  font-size: 50px;
+  color: rgb(247, 245, 235);
+  margin-bottom: 70px;
+}
+.table-con {
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 80px;
+}
+.table-flex {
+  width: 500px;  
+  background: #fff;
+  max-width: 500px;
+  padding: 20px;
+  border: solid 15px rgb(180, 186, 202);
+  box-shadow: 0 10px 7px -5px rgba(0, 0, 0, 0.3);
+}
+.table-frame {
+  border: rgb(136, 133, 127) solid 1px;
+  padding: 30px;
+  box-shadow: inset 2px 2px 7px -2px rgba(119, 119, 63, 0.7);
+}
+
+.table-con p {
+  font-size: 30px;
+  margin: 5px;
+  font-weight:bold;
+}
+.table-frame p{   
+  color: rgb(6, 79, 54);
+}
+.table-frame p:hover{   
+  color: rgb(13, 150, 102);
+  cursor: pointer;
+}
+.each-instruction h2{
+  font-size: 30px;
+  margin: 15px 5px 5px 5px;
+  color: rgb(221, 231, 238);
+}
+.each-instruction p{
+  font-size: 22px;
+  margin: 5px;
+  font-weight:bold;
+}
+
+/* mid section */
+.mid-section {
+  position: relative;
+  margin-bottom: 40px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+.instruction01 {
+  display: flex;
+  flex-direction: column;
+}
+.placeholder01 {
+  width: 40%;
+  padding: 40px;
+  padding-top: 80px;
+}
+.terra-inst-img {
+  background-image: url('../../images/instruction/terraframe.png');
+  background-repeat: no-repeat;  
+  background-size: contain;
+  height: 100%;
+  min-width: 430px;
+  width: 100%;
+}
+
+/* bottom section */
+.bottom-section {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  margin: 20px;
+}
+.instruction02 {
+  display: flex;
+  flex-direction: column;
+  padding-left: 40px;
+  padding-right: 40px;
+  margin-left: 20px;
+
+}
+/* .placeholder02 { */
+  /* background: lightpink; */
+  /* width: 45%; */
+/* } */
+.tracker-inst-img {
+  background-image: url('../../images/instruction/tracker01.png');
+  background-repeat: no-repeat;  
+  background-size: contain;
+  min-width: 550px;
+  min-height: 410px;
+  height: 100%;
+  width: 100%;
+  margin-left: 30px;
+}
+
+.arrow22 {
+  background-image: url('../../images/instruction/r-arrow.png');
+  background-repeat: no-repeat;  
+  background-size: contain;
+  height: 540px;
+  width: 500px;
+  position: absolute;
+  /* height: 8%;
+  width: 4%;
+  background-size: 100%; */
+  z-index: 2;
+  /* top: 180px;
+  left: 1000px; */
+  right: 0px;
+  top: 80px;
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* goal */
+.each-instruction.goal:hover > .arrow22{
+  opacity: 1;
+  visibility: visible;
+}
+.each-instruction.goal:hover {
+  color:  rgb(1, 114, 184);
+}
+/* tracker */
+.each-instruction.tracker:hover .arrow{
+  opacity: 1;
+  visibility: visible;
+  top: 35%;
+}
+.each-instruction.tracker:hover {
+  color:  rgb(1, 114, 184);
+}
+/* streak */
+.each-instruction.streak:hover .arrow{
+  opacity: 1;
+  visibility: visible;
+  top: 42%;
+}
+.each-instruction.streak:hover {
+  color:  rgb(1, 114, 184);
+}
+/* stage */
+.each-instruction.stage:hover .arrow{
+  opacity: 1;
+  visibility: visible;
+  top: 49%;
+}
+.each-instruction.stage:hover {
+  color:  rgb(1, 114, 184);
+}
+/* rank */
+.each-instruction.rank:hover .arrow{
+  opacity: 1;
+  visibility: visible;
+  top: 42%;
+}
+/* .each-instruction.rank:hover .arrow2{
+  opacity: 1;
+  visibility: visible;
+} */
+.each-instruction.rank:hover {
+  color:  rgb(1, 114, 184);
+}
+
+.arrow2 {
+  background-image: url('../../images/instruction/r-arrow.png');
+  position: absolute;
+  background-repeat: no-repeat;  
+  height: 10%;
+  width: 5%;
+  background-size: 100%;
+  z-index: 2;
+  top: 135%;
+  left: 13%;
+  opacity: 0;
+  visibility: hidden;
+  /* left: 32%;
+  top: 136%; */
+}
+/* countdown */
+.each-instruction.countdown:hover .arrow2{
+  opacity: 1;
+  visibility: visible;
+  left: 32%;
+  top: 136%;
+}
+.each-instruction.countdown:hover {
+  color:  rgb(1, 114, 184);
+}
+/* donation */
+.each-instruction.donation:hover .arrow{
+  opacity: 1;
+  visibility: visible;
+  left: 41%;
+  top: 39%;
+}
+.each-instruction.donation:hover {
+  color:  rgb(1, 114, 184);
+}

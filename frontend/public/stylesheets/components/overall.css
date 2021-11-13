@@ -1,0 +1,51 @@
+/* .overall-page { 
+ 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 200px;
+  width: 23%;
+  color:black;
+  z-index: 1;
+} */
+
+.overall-msg {
+  font-size: 25px;
+  z-index: 1;
+  text-align: center;
+  color: rgb(246, 236, 218);
+
+}
+
+
+/* .overall-count {
+  z-index: 1;
+font-size: 50px;
+
+font-weight: 500;
+} */
+
+.cup{ 
+  /* background-image: url(../../images/bottle.gif);
+  background-position-x: 370px;
+  background-position-y: -50px;
+  background-size: cover;
+  height: 490px;
+  width: 250px;   */
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  /* color: white; */
+  z-index: 1;
+  /* padding-bottom: -200px; */
+}
+
+.overall-link {
+  z-index: 1;
+  display: block;
+  /* height: 300px; */
+  /* width: 100%;   */
+}
+

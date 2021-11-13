@@ -1,0 +1,15 @@
+
+
+html, body {
+  height: 100%;
+}
+
+.foot{
+  bottom: 0;
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  bottom: 2%;
+  width: 200px;
+}
