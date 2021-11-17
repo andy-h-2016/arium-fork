@@ -26,7 +26,7 @@ const App = () => {
         .then(res => {
           const gitHash = res.data.gitHash;
           window.localStorage.setItem('gitHash', gitHash);
-
+          console.log('firing')
           console.log(`old hash: ${prevGitHash}`)
           console.log(`new hash: ${gitHash}`)
         })
