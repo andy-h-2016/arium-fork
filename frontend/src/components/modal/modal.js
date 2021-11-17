@@ -1,10 +1,21 @@
-import React from "react";
+import React, {useEffect} from "react";
+import superagent from 'superagent';
 import { closeModal } from "../../actions/modal_actions";
 import { connect } from "react-redux";
 import LoginFormContainer from "../session/login_form_container";
 import SignupFormContainer from "../session/signup_form_container";
 
 function Modal({ modal, closeModal }) {
+  // useEffect( () => {
+  //   const gitInterval = setInterval(() => {
+  //     superagent
+  //       .get('/version')
+  //       .then(res => console.log(res.gitCommit))
+  //   }, 5000);
+
+  //   return (() => clearInterval(gitInterval));
+  // }, [])
+
   if (!modal) {
     return null;
   }

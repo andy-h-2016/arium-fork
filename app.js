@@ -8,6 +8,9 @@ const waterTrackers = require('./routes/api/watertrackers');
 const terrariums = require('./routes/api/terrariums');
 const overallConsumptions = require('./routes/api/overallconsumptions');
 const passport = require('passport');
+const { execSync } = require('child_process');
+
+const gitCommand = 'git rev-parse HEAD';
 
 
 // setup connection with the MongoDB
@@ -40,6 +43,19 @@ app.use("/api/users", users); // give access to methods and APIs from user.js
 app.use("/api/watertrackers", waterTrackers); // give access to methods and APIs from watertrackers.js
 app.use("/api/terrariums", terrariums);
 app.use("/api/overallconsumptions", overallConsumptions);
+app.get("/version", (req, res) => {
+    // const prevGitHash = window.localStorage.getItem('gitHash') || '';
+    const gitHash = execSync(gitCommand).toString().trim();
+    
+    // console.log(`old hash: ${prevGitHash}`)
+    // console.log(`new hash: ${gitHash}`)
+
+    res.setHeader('Content-Type', 'application/json');
+    res.send({
+      status: 'ok',
+      gitHash
+    })
+})
 
 // tell app which port to run on, production port or localhost:5000
 const port = process.env.PORT || 5000;

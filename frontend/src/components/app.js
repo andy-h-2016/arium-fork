@@ -1,4 +1,6 @@
-import React from 'react';
+import React, {useEffect} from 'react';
+import axios from 'axios';
+import superagent from 'superagent';
 // import { Route} from 'react-router-dom'; 
 import { AuthRoute, ProtectedRoute } from '../util/route_util';
 import { Switch } from 'react-router-dom';
@@ -14,28 +16,48 @@ import DonationInfoPage from './info/donation_info';
 import TerrariumShowContainer from './terrarium/terrarium_show_container';
 import InstructionPage from './info/instruction';
 
-const App = () => (
-  <div className="main-container">
-    <SideBar/>
-    <Modal/>
-    {/* <ProtectedRoute path="/" component={TimerContainer}/> */}
-    <Switch>
-      <AuthRoute exact path="/" component={Splash} />
 
-      <ProtectedRoute exact path="/terrarium" component={TerrariumContainer} />
-      <ProtectedRoute exact path="/terrarium/:id" component={TerrariumShowContainer} />
-      <ProtectedRoute exact path="/terrariums" component={TerrariumIndexContainer} />
-      <ProtectedRoute exact path="/watertracker" component={WaterTrackerContainer} />
-      <ProtectedRoute exact path="/info" component={InfoPage} />
-      <ProtectedRoute exact path="/donation" component={DonationInfoPage} />
-      <ProtectedRoute exact path="/instruction" component={InstructionPage} />
+const App = () => {
+  useEffect( () => {
+    const gitInterval = setInterval(() => {
+      const prevGitHash = window.localStorage.getItem('gitHash') || '';
+      axios
+        .get('/version')
+        .then(res => {
+          const gitHash = res.data.gitHash;
+          window.localStorage.setItem('gitHash', gitHash);
 
-    </Switch>
-      <div className="foot">
-          <div className="push"></div>
-        <footer className="foot"></footer>
-      </div>
-  </div>
-);
+          console.log(`old hash: ${prevGitHash}`)
+          console.log(`new hash: ${gitHash}`)
+        })
+    }, 5000);
+
+    return (() => clearInterval(gitInterval));
+  }, [])
+
+  return (
+    <div className="main-container">
+      <SideBar/>
+      <Modal/>
+      {/* <ProtectedRoute path="/" component={TimerContainer}/> */}
+      <Switch>
+        <AuthRoute exact path="/" component={Splash} />
+
+        <ProtectedRoute exact path="/terrarium" component={TerrariumContainer} />
+        <ProtectedRoute exact path="/terrarium/:id" component={TerrariumShowContainer} />
+        <ProtectedRoute exact path="/terrariums" component={TerrariumIndexContainer} />
+        <ProtectedRoute exact path="/watertracker" component={WaterTrackerContainer} />
+        <ProtectedRoute exact path="/info" component={InfoPage} />
+        <ProtectedRoute exact path="/donation" component={DonationInfoPage} />
+        <ProtectedRoute exact path="/instruction" component={InstructionPage} />
+
+      </Switch>
+        <div className="foot">
+            <div className="push"></div>
+          <footer className="foot"></footer>
+        </div>
+    </div>
+  )
+};
 
 export default App;

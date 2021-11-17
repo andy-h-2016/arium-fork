@@ -6,7 +6,6 @@ const passport = require('passport');
 const WaterTracker = require('../../models/WaterTracker');
 const OverallConsumption = require('../../models/OverallConsumption');
 const validateWaterTrackerInput = require('../../validation/watertracker');
-const alertIfBalanceLow = require('../../helper/email')
 
 router.get('/test', (req, res) => res.json({ msg: 'The water tracker router is working' }));
 
@@ -98,8 +97,6 @@ router.patch('/:id',
               fundsGenerated,
               fundsBalance
             }
-
-            alertIfBalanceLow(fundsBalance, grabOverall.lastAlertedAt, grabOverall._id);
             
             OverallConsumption.findByIdAndUpdate(grabOverall._id, updateOverall, { new: true }, (err, overallConsumption) => {
                 if (err) {
