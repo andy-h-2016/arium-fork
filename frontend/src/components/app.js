@@ -21,6 +21,17 @@ const App = () => {
   const [newGit, setNewGit] = useState(null);
 
   useEffect(() => {
+    axios.get("/version").then((res) => {
+      const prevGitHash = window.localStorage.getItem("gitHash") || "";
+      const gitHash = res.data.gitHash;
+      window.localStorage.setItem("gitHash", gitHash);
+      console.log("firing");
+      console.log(`old hash: ${prevGitHash}`);
+      console.log(`new hash: ${gitHash}`);
+      setOldGit(prevGitHash);
+      setNewGit(gitHash);
+    });
+
     const gitInterval = setInterval(() => {
       const prevGitHash = window.localStorage.getItem("gitHash") || "";
       axios.get("/version").then((res) => {
@@ -32,7 +43,7 @@ const App = () => {
         setOldGit(prevGitHash);
         setNewGit(gitHash);
       });
-    }, 5000);
+    }, 60 * 1000);
 
     return () => clearInterval(gitInterval);
   }, []);

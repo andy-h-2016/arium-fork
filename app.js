@@ -45,16 +45,22 @@ app.use("/api/terrariums", terrariums);
 app.use("/api/overallconsumptions", overallConsumptions);
 app.get("/version", (req, res) => {
     // const prevGitHash = window.localStorage.getItem('gitHash') || '';
-    const gitHash = execSync(gitCommand).toString().trim();
+    try {
+      const gitHash = execSync(gitCommand).toString().trim();
+      res.setHeader('Content-Type', 'application/json');
+      res.send({
+        status: 'ok',
+        gitHash
+      })
+    } catch (error) {
+      res.status(400).send({
+        message: error
+      })
+    }
     
     // console.log(`old hash: ${prevGitHash}`)
     // console.log(`new hash: ${gitHash}`)
 
-    res.setHeader('Content-Type', 'application/json');
-    res.send({
-      status: 'ok',
-      gitHash
-    })
 })
 
 // tell app which port to run on, production port or localhost:5000
