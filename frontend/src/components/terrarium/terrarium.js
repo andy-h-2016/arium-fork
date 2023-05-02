@@ -108,12 +108,6 @@ const options = {
     x: {
       ticks: {
         callback: (value, index, ticks) => {
-          console.log("ticks[0]: ", ticks[0]);
-          console.log(
-            "ticks[0] && ticks[0].$context: ",
-            ticks[0] && ticks[0].$context
-          );
-          console.log("ticks: ", ticks);
           const prototype =
             ticks?.[0]?.$context && Object.getPrototypeOf(ticks?.[0]?.$context);
           const labels = prototype?.scale?.chart?._config?.data?.labels;
@@ -137,7 +131,6 @@ class Terrarium extends React.Component {
 
   componentDidMount() {
     getMoesifTemplate().then((res) => {
-      console.log('res: ', res)
       const url = res.data.url
       this.setState({ moesifUrl: url });
     });

@@ -10,8 +10,6 @@ class WaterTracker extends React.Component {
   }
   componentDidMount() {
     db.allDocs({ include_docs: true }).then((response) => {
-      console.log("response", response);
-      console.log("rows", response.rows);
       this.setState({ todos: response.rows });
     });
   }
@@ -38,17 +36,11 @@ class WaterTracker extends React.Component {
       completed: false,
     };
     db.post(todo).then((response) => {
-      console.log("response", response);
       db.get(response.id).then((newTodo) => {
         const updatedTodosList = [...this.state.todos, newTodo];
-        this.setState({ todos: updatedTodosList }, () =>
-          console.log("Updated List", this.state.todos)
-        );
+        this.setState({ todos: updatedTodosList });
       });
-      db.allDocs({ include_docs: true }).then((response) => {
-        console.log("response", response);
-        console.log("rows", response.rows);
-      });
+      db.allDocs({ include_docs: true });
     });
   }
 
@@ -135,11 +127,9 @@ class WaterTracker extends React.Component {
                 <button
                   onClick={() => {
                     db.get(todo.id || todo._id).then((todoFromDB) => {
-                      console.log('this.state.todos')
-                      console.log(this.state.todos)
-                      console.log("retrieved todo");
-                      console.log(todoFromDB)
-                      const idx = this.state.todos.findIndex((potentialTodo) => potentialTodo.id === todo._id);
+                      const idx = this.state.todos.findIndex(
+                        (potentialTodo) => potentialTodo.id === todo._id
+                      );
                       const updatedTodos = [...this.state.todos];
                       updatedTodos.splice(idx, 1, todoFromDB);
                       this.setState({ todos: updatedTodos });
