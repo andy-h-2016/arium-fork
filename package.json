@@ -11,7 +11,8 @@
     "frontend": "npm start --prefix frontend",
     "dev": "concurrently \"npm run server\" \"npm run frontend\"",
     "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false npm install --prefix frontend && npm run build --prefix frontend",
-    "run-prod": "npm install && npm install --prefix frontend && npm run build --prefix frontend && npm start && npm run frontend"
+    "build": "npm install && npm install --prefix frontend && npm run build --prefix frontend",
+    "prod": "concurrently \"npm run start\" \"npm run frontend\""
   },
   "keywords": [],
   "author": "",
