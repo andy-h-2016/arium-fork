@@ -1,38 +1,85 @@
-import React from 'react';
-import {Link, withRouter } from 'react-router-dom';
-
-
+import React from "react";
+import { Link, withRouter } from "react-router-dom";
+import PouchDB from "pouchdb";
+const db = new PouchDB("todos");
 class WaterTracker extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { todos: [], newTodo: "" };
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
+  componentDidMount() {
+    db.allDocs({ include_docs: true }).then((response) => {
+      console.log("response", response);
+      console.log("rows", response.rows);
+      this.setState({ todos: response.rows });
+    });
+  }
 
   componentDidUpdate(prevProps) {
     if (prevProps.currentUser.goal !== this.props.currentUser.goal) {
-      this.setState(this.props.currentUser)
+      this.setState(this.props.currentUser);
     }
 
-    if (prevProps.terrarium && (prevProps.terrarium.level !== this.props.terrarium.level)) {
-      this.setState(this.props.currentUser)
+    if (
+      prevProps.terrarium &&
+      prevProps.terrarium.level !== this.props.terrarium.level
+    ) {
+      this.setState(this.props.currentUser);
     }
+  }
+
+  handleSubmit(evt) {
+    evt.preventDefault();
+    evt.stopPropagation();
+
+    const todo = {
+      title: this.state.newTodo,
+      completed: false,
+    };
+    db.post(todo).then((response) => {
+      console.log("response", response);
+      db.get(response.id).then((newTodo) => {
+        const updatedTodosList = [...this.state.todos, newTodo];
+        this.setState({ todos: updatedTodosList }, () =>
+          console.log("Updated List", this.state.todos)
+        );
+      });
+      db.allDocs({ include_docs: true }).then((response) => {
+        console.log("response", response);
+        console.log("rows", response.rows);
+      });
+    });
   }
 
   render() {
     let { waterTracker, currentUser, terrarium } = this.props;
-    if (!terrarium) return <div></div>
-    if (!waterTracker) return <div></div>
+    if (!terrarium) return <div></div>;
+    if (!waterTracker) return <div></div>;
 
     let healthMsg;
 
     switch (true) {
       case waterTracker.today === 0:
-        healthMsg = <div id="healthmsg">Just keep drinking, just keep drinking...</div>;
+        healthMsg = (
+          <div id="healthmsg">Just keep drinking, just keep drinking...</div>
+        );
         break;
-      case waterTracker.today < Math.floor((0.5 * currentUser.goal)):
-        healthMsg = <div id="healthmsg">Good job, keep this momentum going!</div>;
+      case waterTracker.today < Math.floor(0.5 * currentUser.goal):
+        healthMsg = (
+          <div id="healthmsg">Good job, keep this momentum going!</div>
+        );
         break;
-      case waterTracker.today >= Math.floor((0.5 * currentUser.goal)) && (waterTracker.today < currentUser.goal):
-        healthMsg = <div id="healthmsg">You're almost there, you can do this!</div>;
+      case waterTracker.today >= Math.floor(0.5 * currentUser.goal) &&
+        waterTracker.today < currentUser.goal:
+        healthMsg = (
+          <div id="healthmsg">You're almost there, you can do this!</div>
+        );
         break;
       case waterTracker.today >= currentUser.goal:
-        healthMsg = <div id="healthmsg">Amazing work... You deserve a drink.</div>;
+        healthMsg = (
+          <div id="healthmsg">Amazing work... You deserve a drink.</div>
+        );
         break;
       default:
         break;
@@ -46,88 +93,119 @@ class WaterTracker extends React.Component {
 
     switch (true) {
       case waterTracker.streak >= 0 && waterTracker.streak <= 7:
-        rankOne = 'rankone';
+        rankOne = "rankone";
         break;
       case waterTracker.streak > 7 && waterTracker.streak <= 15:
-        rankTwo = 'ranktwo';
+        rankTwo = "ranktwo";
         break;
       case waterTracker.streak > 15 && waterTracker.streak <= 23:
-        rankThree = 'rankthree';
+        rankThree = "rankthree";
         break;
       case waterTracker.streak > 23 && waterTracker.streak <= 31:
-        rankFour = 'rankfour';
+        rankFour = "rankfour";
         break;
       case waterTracker.streak > 31:
-        rankFive = 'rankfive';
+        rankFive = "rankfive";
         break;
       default:
         break;
     }
 
-
-    let drinks = currentUser.goal - waterTracker.today
+    let drinks = currentUser.goal - waterTracker.today;
     if (drinks <= 0) {
-      drinks = 0
+      drinks = 0;
     }
     return (
       <div className="water-tracker-container">
-          
-          <div className="water-info-container">
-        <div className="water-tracker-header">
-          <div className="wt-header-title">
-            Water Tracker
+        <div>
+          <form onSubmit={this.handleSubmit}>
+            <input
+              type="text"
+              value={this.state.newTodo}
+              onChange={(evt) => this.setState({ newTodo: evt.target.value })}
+            />
+            <input type="submit" value="Create Todo" />
+          </form>
+        </div>
+        <ul>
+          {this.state.todos &&
+            this.state.todos.map((todo) => (
+              <li>
+                <span>{todo.doc?.title}</span>
+                <button
+                  onClick={() => {
+                    db.get(todo.id || todo._id).then((todoFromDB) => {
+                      console.log('this.state.todos')
+                      console.log(this.state.todos)
+                      console.log("retrieved todo");
+                      console.log(todoFromDB)
+                      const idx = this.state.todos.findIndex((potentialTodo) => potentialTodo.id === todo._id);
+                      const updatedTodos = [...this.state.todos];
+                      updatedTodos.splice(idx, 1, todoFromDB);
+                      this.setState({ todos: updatedTodos });
+                    });
+                  }}
+                >
+                  Get Title
+                </button>
+              </li>
+            ))}
+        </ul>
+        <div className="water-info-container">
+          <div className="water-tracker-header">
+            <div className="wt-header-title">Water Tracker</div>
+            <div className="water-tooltip">
+              <div className="water-info-Link">
+                <Link to={"/instruction"}>
+                  <div className="water-info-link">
+                    <i className="fas fa-info-circle water-fa-info-circle"></i>
+                  </div>
+                </Link>
+                <span className="water-tooltiptext">Information</span>
+              </div>
+            </div>
           </div>
-<div className="water-tooltip">
-<div className="water-info-Link">
-<Link to={'/instruction'}>
-  <div className="water-info-link">
-  <i className="fas fa-info-circle water-fa-info-circle"></i>
-  </div>
-</Link>
-    <span className="water-tooltiptext">Information</span>
-</div>
-</div>
-</div>
         </div>
 
-        <div className='two-of-items1'>
-
+        <div className="two-of-items1">
           <div className="wt-terrarium-title">
-            <div className='frame-mgn'>
-              <div className="terr-title-text">
-                {terrarium.title}
+            <div className="frame-mgn">
+              <div className="terr-title-text">{terrarium.title}</div>
+              <div className="w-comment">
+                A message from your Terrarium:{healthMsg}
               </div>
-              <div className='w-comment'>A message from your Terrarium:{healthMsg}</div>
             </div>
           </div>
 
           <div className="water-tracker-goal">
-            <div className='frame-mgn'>
-              <div className="terr-title-text2"> Please drink  </div>
-              <div className="terr-title-text num-ani" > {drinks} </div>
-              <div className='w-comment'> more cups of water today to grow your wonderful Terrarium. </div>
+            <div className="frame-mgn">
+              <div className="terr-title-text2"> Please drink </div>
+              <div className="terr-title-text num-ani"> {drinks} </div>
+              <div className="w-comment">
+                {" "}
+                more cups of water today to grow your wonderful Terrarium.{" "}
+              </div>
             </div>
           </div>
-
         </div>
 
-
-        <div className='two-of-items2'>
-
+        <div className="two-of-items2">
           <div className="water-tracker-total">
-            <div className='frame-mgn'>
-              <div className='comment-l' > WOW!</div>
-              <div className='comment-m'> You've drank </div>
-              <div className='comment-l num-ani'> {waterTracker.total} </div>
-              <div className='comment-m'> cups of water </div>
-              <div className='comment-s'>since you've signed up for </div>
-              <div className='comment-l'>Arium</div>
+            <div className="frame-mgn">
+              <div className="comment-l"> WOW!</div>
+              <div className="comment-m"> You've drank </div>
+              <div className="comment-l num-ani"> {waterTracker.total} </div>
+              <div className="comment-m"> cups of water </div>
+              <div className="comment-s">since you've signed up for </div>
+              <div className="comment-l">Arium</div>
             </div>
           </div>
 
           <div className="water-tracker-streak">
-            <div className='frame-mgn'>
-              <div className="currentrank">Maintain your streaks to rank up!</div>
+            <div className="frame-mgn">
+              <div className="currentrank">
+                Maintain your streaks to rank up!
+              </div>
               <div className="rank-container">
                 <div className="streak-levels">
                   <div className={`rank-level ${rankOne}`}>0</div>
@@ -138,10 +216,14 @@ class WaterTracker extends React.Component {
                 </div>
                 <div className="rank-titles">
                   <div className={`currentrank ${rankOne}`}>Wet Willie</div>
-                  <div className={`currentrank ${rankTwo}`}>Saturated Sally</div>
+                  <div className={`currentrank ${rankTwo}`}>
+                    Saturated Sally
+                  </div>
                   <div className={`currentrank ${rankThree}`}>Thirsty Thug</div>
                   <div className={`currentrank ${rankFour}`}>Hydro Homie</div>
-                  <div className={`currentrank ${rankFive}`}>Moisture Master</div>
+                  <div className={`currentrank ${rankFive}`}>
+                    Moisture Master
+                  </div>
                 </div>
               </div>
             </div>
@@ -150,7 +232,6 @@ class WaterTracker extends React.Component {
       </div>
     );
   }
-
 }
 
 export default withRouter(WaterTracker);

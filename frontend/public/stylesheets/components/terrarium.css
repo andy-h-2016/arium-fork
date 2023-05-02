@@ -241,3 +241,8 @@ a:link{
   visibility: visible;
   opacity: 1;
 }
+
+iframe {
+  height: 50vh;
+  width: 70vh;
+}

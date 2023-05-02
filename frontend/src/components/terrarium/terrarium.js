@@ -1,17 +1,150 @@
 import React from "react";
 import { withRouter, Link } from "react-router-dom";
+import nodemailer from "nodemailer";
+import {
+  getMoesifTemplate,
+  sendTestEmail,
+} from "../../util/terrarium_api_util";
+import { DateTime } from "luxon";
+
+import {
+  Chart as ChartJs,
+  ArcElement,
+  LineElement,
+  BarElement,
+  PointElement,
+  BarController,
+  BubbleController,
+  DoughnutController,
+  LineController,
+  PieController,
+  PolarAreaController,
+  RadarController,
+  ScatterController,
+  CategoryScale,
+  LinearScale,
+  LogarithmicScale,
+  RadialLinearScale,
+  TimeScale,
+  TimeSeriesScale,
+  Decimation,
+  Filler,
+  Legend,
+  Title,
+  Tooltip,
+  SubTitle,
+} from "chart.js";
+import { Chart } from "react-chartjs-2";
+
+ChartJs.register(
+  ArcElement,
+  LineElement,
+  BarElement,
+  PointElement,
+  BarController,
+  BubbleController,
+  DoughnutController,
+  LineController,
+  PieController,
+  PolarAreaController,
+  RadarController,
+  ScatterController,
+  CategoryScale,
+  LinearScale,
+  LogarithmicScale,
+  RadialLinearScale,
+  TimeScale,
+  TimeSeriesScale,
+  Decimation,
+  Filler,
+  Legend,
+  Title,
+  Tooltip,
+  SubTitle
+);
+
+const initialStartDate = DateTime.now();
+
+const data = {
+  // labels: ["Red", "Blue", "Yellow", "Green", "Purple", "Orange"],
+  labels: [
+    initialStartDate.minus({ days: 4 }),
+    initialStartDate.minus({ days: 3 }),
+    initialStartDate.minus({ days: 2 }),
+    initialStartDate.minus({ days: 1 }),
+    initialStartDate,
+  ],
+  datasets: [
+    {
+      fill: "origin",
+      label: "# of Votes",
+      data: [12, 19, 3, 5, 2, 3],
+      backgroundColor: [
+        "rgba(255, 99, 132, 0.2)",
+        // "rgba(54, 162, 235, 0.2)",
+        // "rgba(255, 206, 86, 0.2)",
+        // "rgba(75, 192, 192, 0.2)",
+        // "rgba(153, 102, 255, 0.2)",
+        // "rgba(255, 159, 64, 0.2)",
+      ],
+      borderColor: [
+        "rgba(255, 99, 132, 1)",
+        // "rgba(54, 162, 235, 1)",
+        // "rgba(255, 206, 86, 1)",
+        // "rgba(75, 192, 192, 1)",
+        // "rgba(153, 102, 255, 1)",
+        // "rgba(255, 159, 64, 1)",
+      ],
+      borderWidth: 1,
+    },
+  ],
+};
+
+const options = {
+  scales: {
+    y: {
+      beginAtZero: true,
+    },
+    x: {
+      ticks: {
+        callback: (value, index, ticks) => {
+          console.log("ticks[0]: ", ticks[0]);
+          console.log(
+            "ticks[0] && ticks[0].$context: ",
+            ticks[0] && ticks[0].$context
+          );
+          console.log("ticks: ", ticks);
+          const prototype =
+            ticks?.[0]?.$context && Object.getPrototypeOf(ticks?.[0]?.$context);
+          const labels = prototype?.scale?.chart?._config?.data?.labels;
+          const dateTime = labels && labels[index];
+
+          return `$ ${value}`;
+          // return dateTime && dateTime.toLocaleString();
+        },
+      },
+    },
+  },
+};
+
 class Terrarium extends React.Component {
   constructor(props) {
     super(props);
     this.addWater = this.addWater.bind(this);
     this.removeWater = this.removeWater.bind(this);
-    this.state = this.props.currentUser;
+    this.state = { ...this.props.currentUser, moesifUrl: "" };
+  }
+
+  componentDidMount() {
+    getMoesifTemplate().then((res) => {
+      console.log('res: ', res)
+      const url = res.data.url
+      this.setState({ moesifUrl: url });
+    });
   }
 
   componentDidUpdate(prevProps) {
-    if (
-      prevProps.currentUser.goal !== this.props.currentUser.goal
-    ) {
+    if (prevProps.currentUser.goal !== this.props.currentUser.goal) {
       this.setState(this.props.currentUser);
     }
   }
@@ -166,29 +299,29 @@ class Terrarium extends React.Component {
     e.stopPropagation();
     let waterTracker = {
       ...this.props.waterTracker,
-      type: 'increment',
-      delta: 1
+      type: "increment",
+      delta: 1,
     };
 
     if (this.props.waterTracker.today >= 10) {
       return;
     }
 
-    this.props.updateWaterTracker(waterTracker)
+    this.props.updateWaterTracker(waterTracker);
   }
 
   removeWater(e) {
     e.preventDefault();
     e.stopPropagation();
-      let waterTracker = {
+    let waterTracker = {
       ...this.props.waterTracker,
-      type: 'increment',
-      delta: -1
+      type: "increment",
+      delta: -1,
     };
     if (this.props.waterTracker.today <= 0) {
       return;
     }
-    this.props.updateWaterTracker(waterTracker)
+    this.props.updateWaterTracker(waterTracker);
   }
 
   renderStatus() {
@@ -221,7 +354,7 @@ class Terrarium extends React.Component {
           </div>
           <div className="terra-row">
             <p>Cups of water today</p>
-            <p className='row-number'>{this.props.waterTracker.today}</p>
+            <p className="row-number">{this.props.waterTracker.today}</p>
           </div>
           <div className={`terra-row ${bonus}`}>
             <p>Daily goal streak</p>
@@ -247,10 +380,9 @@ class Terrarium extends React.Component {
         <h1 className="welcome-mes">
           {terrarium.title}
           <div className="info-container">
-
             <div className="tooltip">
               <div className="info-Link">
-                <Link to={'/instruction'}>
+                <Link to={"/instruction"}>
                   <div className="info-link">
                     <i className="fas fa-info-circle"></i>
                   </div>
@@ -261,7 +393,26 @@ class Terrarium extends React.Component {
           </div>
         </h1>
 
-        <div></div>
+        <div className="chart-wrapper">
+          <Chart
+            key="line"
+            type="line"
+            options={options}
+            data={data}
+            // height={height}
+            // width={width}
+          />
+        </div>
+
+        <iframe
+          id="preview-frame"
+          title="moesif-chart"
+          src={this.state.moesifUrl}
+          name="preview-frame"
+          frameBorder="0"
+          noresize="noresize"
+        ></iframe>
+
         <div className="on-shelf">
           {this.renderTerra()}
 
