@@ -1,4 +1,5 @@
 import React from "react";
+import UxAnalytics, { EVENTS } from "../ux_analytics/ux_analytics";
 
 class SessionForm extends React.Component {
   constructor(props) {
@@ -28,10 +29,13 @@ class SessionForm extends React.Component {
   handleSubmit(e) {
     e.preventDefault();
     let user = Object.assign({}, this.state);
-    this.props.processForm(user).then( () => { 
-    ( this.props.errors.length <=0 ? this.props.closeModal(): user = null);
-   }
-   )
+    this.props.processForm(user).then(() => {
+      if (this.props.errors.length <= 0) {
+        this.props.closeModal();
+      } else {
+        user = null;
+      }
+    });
   }
 
   handleDemo(e) {
@@ -40,6 +44,7 @@ class SessionForm extends React.Component {
       username: "demo",
       password: "123456",
     });
+    UxAnalytics.logEvent(EVENTS.DEMO_SIGN_IN);
     this.props.closeModal();
   }
 

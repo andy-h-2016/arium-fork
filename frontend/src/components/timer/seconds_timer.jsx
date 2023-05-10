@@ -1,15 +1,14 @@
-import React from 'react';
-const INTERVAL = 1000 * 15 //TIME IN MILLISECONDS
-
+import React from "react";
+import UxAnalytics, { EVENTS } from "../ux_analytics/ux_analytics";
+const INTERVAL = 1000 * 15; //TIME IN MILLISECONDS
 
 class SecondsTimer extends React.Component {
   constructor(props) {
-    super(props)
-    this.state = {countdown: 0}
+    super(props);
+    this.state = { countdown: 0 };
     this.setCountdown = this.setCountdown.bind(this);
     this.setCountdown();
     this.levelCalculatedOnLogin = false;
-
   }
 
   componentDidMount() {
@@ -17,17 +16,21 @@ class SecondsTimer extends React.Component {
     this.props.fetchUserTerrarium(id);
     this.props.fetchUserWaterTracker(id);
     const timerId = Math.random();
-    this.intervalID = setInterval( () => {
+    this.intervalID = setInterval(() => {
       this.calculateTerrariumLevels();
       this.setCountdown();
-    }, INTERVAL); 
+    }, INTERVAL);
   }
 
   componentDidUpdate() {
     //only want this to run on the first update after componentDidMount runs
-    if ((this.levelCalculatedOnLogin === false) && this.props.waterTracker && this.props.terrarium ) {
+    if (
+      this.levelCalculatedOnLogin === false &&
+      this.props.waterTracker &&
+      this.props.terrarium
+    ) {
       this.levelCalculatedOnLogin = true;
-      this.calculateTerrariumLevels()
+      this.calculateTerrariumLevels();
     }
   }
 
@@ -37,62 +40,69 @@ class SecondsTimer extends React.Component {
   }
 
   setCountdown() {
-    this.setState({countdown: INTERVAL / 1000})
+    this.setState({ countdown: INTERVAL / 1000 });
     let countdown = this.state.countdown;
-    clearInterval(this.countdownID)
+    clearInterval(this.countdownID);
 
-    this.countdownID = setInterval( () => {
+    this.countdownID = setInterval(() => {
       if (countdown > 0) {
-        this.setState({countdown: this.state.countdown - 1})
+        this.setState({ countdown: this.state.countdown - 1 });
       } else {
-        this.setCountdown()
+        this.setCountdown();
       }
-    }, 1000)
+    }, 1000);
   }
 
   calculateTerrariumLevels() {
-    let {waterTracker, terrarium, currentUser} = this.props;
+    let { waterTracker, terrarium, currentUser } = this.props;
     let secondsElapsed = this.secondsCounter();
     let isTerrariumMaxed;
     let isTerrariumMin;
     let timePeriods = 1;
 
     // if (true) { //THIS LINE IS USED IF WE ARE NOT KEEPING TRACK OF TIME ONCE THE USER CLOSES THE APP
-    if (secondsElapsed > (INTERVAL / 1000)) {              // THIS LINE KEEPS TRACK OF TIME WHILE USER IS AWAY
+    if (secondsElapsed > INTERVAL / 1000) {
+      // THIS LINE KEEPS TRACK OF TIME WHILE USER IS AWAY
       timePeriods = Math.floor(secondsElapsed / (INTERVAL / 1000)); //THIS LINKE KEEPS TRACK OF TIME WHILE USER IS AWAY
       switch (true) {
         case waterTracker.today >= currentUser.goal:
-          let increase = (waterTracker.streak > 1) ? 2 : 1;
+          let increase = waterTracker.streak > 1 ? 2 : 1;
           waterTracker.streak += 1;
           if (terrarium.level === 30) {
-            isTerrariumMaxed = true
+            isTerrariumMaxed = true;
           } else if (terrarium.level + increase > 30) {
             terrarium.level = 30;
+            UxAnalytics.logEvent(EVENTS.INCREASE_LEVEL)
           } else {
             terrarium.level += increase;
+            UxAnalytics.logEvent(EVENTS.INCREASE_LEVEL)
           }
-          break
-        case waterTracker.today >= Math.floor(.5 * currentUser.goal):
+          break;
+        case waterTracker.today >= Math.floor(0.5 * currentUser.goal):
           //terrariumlevel += 0; no change.
           waterTracker.streak = 0;
-          break
-        case waterTracker.today < Math.floor(.5 * currentUser.goal):
+          UxAnalytics.logEvent(EVENTS.MAINTAIN_LEVEL)
+          break;
+        case waterTracker.today < Math.floor(0.5 * currentUser.goal):
+        default:
           if (terrarium.level === 1) {
-            isTerrariumMin = true
+            isTerrariumMin = true;
+            UxAnalytics.logEvent(EVENTS.MAINTAIN_LEVEL)
           } else {
             terrarium.level -= 1;
+            UxAnalytics.logEvent(EVENTS.DECREASE_LEVEL)
           }
           waterTracker.streak = 0;
-          break
+          break;
       }
 
       //if user has not been active for more than 1 time period
       if (timePeriods > 1) {
-        //Lose a level for each day not active. 
+        //Lose a level for each day not active.
         //Subtract a day since the first day's results are calculated in the switch statement above
         const levelsDecrease = timePeriods - 1;
         if (terrarium.level - levelsDecrease < 1) {
-          terrarium.level = 1 
+          terrarium.level = 1;
         } else {
           terrarium.level -= levelsDecrease;
         }
@@ -101,45 +111,45 @@ class SecondsTimer extends React.Component {
 
       //reset water count, update WaterTracker and Terrarium
       waterTracker.today = 0;
-      waterTracker.type = 'calculateStreak'
-      this.props.updateWaterTracker(waterTracker)
+      waterTracker.type = "calculateStreak";
+      this.props
+        .updateWaterTracker(waterTracker)
         .then(() => {
           if (isTerrariumMaxed || isTerrariumMin) {
-            return
+            return;
           } else {
             this.props.updateTerrarium(terrarium);
           }
         })
-        .then(() => this.forceUpdate());   
+        .then(() => this.forceUpdate());
     }
   }
-          
+
   secondsCounter() {
     const currentDate = new Date();
-    const lastActiveDate = new Date(localStorage.getItem('lastActiveDate'));
+    const lastActiveDate = new Date(localStorage.getItem("lastActiveDate"));
     let secondsElapsed;
-    
-    if (lastActiveDate) {
-    const msElapsed = currentDate.getTime() - lastActiveDate.getTime();
-    secondsElapsed = msElapsed / (1000) //convert ms to seconds
-  } else {
-    secondsElapsed = 0; 
-  }
 
-    localStorage.setItem('lastActiveDate', currentDate);
+    if (lastActiveDate) {
+      const msElapsed = currentDate.getTime() - lastActiveDate.getTime();
+      secondsElapsed = msElapsed / 1000; //convert ms to seconds
+    } else {
+      secondsElapsed = 0;
+    }
+
+    localStorage.setItem("lastActiveDate", currentDate);
 
     return secondsElapsed;
   }
 
   render() {
-    return(
-      <div className='timer'>
-        <div className='hourglass'></div>
-        <div className='timer-value'>{this.state.countdown}</div>
+    return (
+      <div className="timer">
+        <div className="hourglass"></div>
+        <div className="timer-value">{this.state.countdown}</div>
       </div>
-    )
+    );
   }
-
 }
 
 export default SecondsTimer;

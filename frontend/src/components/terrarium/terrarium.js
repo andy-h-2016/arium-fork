@@ -35,6 +35,7 @@ import {
   SubTitle,
 } from "chart.js";
 import { Chart } from "react-chartjs-2";
+import UxAnalytics, { EVENTS } from "../ux_analytics/ux_analytics";
 
 ChartJs.register(
   ArcElement,
@@ -131,7 +132,7 @@ class Terrarium extends React.Component {
 
   componentDidMount() {
     getMoesifTemplate().then((res) => {
-      const url = res.data.url
+      const url = res.data.url;
       this.setState({ moesifUrl: url });
     });
   }
@@ -300,6 +301,7 @@ class Terrarium extends React.Component {
       return;
     }
 
+    UxAnalytics.logEvent(EVENTS.INCREMENT_CUP_CONSUMED);
     this.props.updateWaterTracker(waterTracker);
   }
 
@@ -314,6 +316,8 @@ class Terrarium extends React.Component {
     if (this.props.waterTracker.today <= 0) {
       return;
     }
+
+    UxAnalytics.logEvent(EVENTS.DECREMENT_CUP_CONSUMED);
     this.props.updateWaterTracker(waterTracker);
   }
 
@@ -327,20 +331,24 @@ class Terrarium extends React.Component {
             <p>Goal</p>
             <button
               className="inc-goal"
-              onClick={() =>
+              onClick={() => {
                 this.props.updateUser(this.state.id, {
                   goal: this.state.goal + 1,
-                })
-              }
+                });
+                UxAnalytics.logEvent(EVENTS.INCREMENT_GOAL);
+              }}
             ></button>
             <p className="row-number">{this.props.currentUser.goal}</p>
             <div className="upDown">
               <button
                 className="dec-goal"
-                onClick={() =>
+                onClick={() => {
+
                   this.props.updateUser(this.state.id, {
                     goal: this.state.goal - 1,
-                  })
+                  });
+                  UxAnalytics.logEvent(EVENTS.DECREMENT_GOAL);
+                }
                 }
               ></button>
             </div>
